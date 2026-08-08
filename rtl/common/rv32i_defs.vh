@@ -17,6 +17,7 @@
 `define ALU_SLTU   4'b1001
 `define ALU_PASS_B 4'b1010
 
+`define OPCODE_OP 7'b0110011
 `define OPCODE_OP_IMM   7'b0010011
 `define OPCODE_LOAD     7'b0000011
 `define OPCODE_STORE    7'b0100011

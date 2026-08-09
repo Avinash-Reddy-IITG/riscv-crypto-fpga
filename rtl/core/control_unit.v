@@ -145,28 +145,44 @@ module control_unit (
             end
 
             //--------------------------------------------------
-            // LUI
-            //--------------------------------------------------
+  // LUI
+//
+// rd = immediate
+//
+// ALU:
+//     0 + immediate
+//
+// ALUOp = 00 forces ADD.
+//--------------------------------------------------
 
-            `OPCODE_LUI: begin
+`OPCODE_LUI: begin
 
-                RegWrite = 1'b1;
-                ALUSrc   = 1'b1;
-                ALUOp    = 2'b10;
+    RegWrite = 1'b1;
+    ALUSrc   = 1'b1;
+    ALUOp    = 2'b00;
 
-            end
+end
 
-            //--------------------------------------------------
-            // AUIPC
-            //--------------------------------------------------
 
-            `OPCODE_AUIPC: begin
+//--------------------------------------------------
+// AUIPC
+//
+// rd = PC + immediate
+//
+// ALU:
+//     PC + immediate
+//
+// ALUOp = 00 forces ADD.
+//--------------------------------------------------
 
-                RegWrite = 1'b1;
-                ALUSrc   = 1'b1;
-                ALUOp    = 2'b10;
+`OPCODE_AUIPC: begin
 
-            end
+    RegWrite = 1'b1;
+    ALUSrc   = 1'b1;
+    ALUOp    = 2'b00;
+
+end
+
 
             //--------------------------------------------------
             // JAL

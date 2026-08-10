@@ -67,11 +67,26 @@ module rv32i_datapath #(
     // Datapath Outputs
     //----------------------------------------------------------
 
-    output wire [DATA_WIDTH-1:0] next_pc,
-    output wire [DATA_WIDTH-1:0] rd_data,
-    output wire [DATA_WIDTH-1:0] alu_result,
-    output wire [DATA_WIDTH-1:0] memory_data,
-    output wire                  branch_taken
+    //----------------------------------------------------------
+// Datapath Outputs
+//----------------------------------------------------------
+
+output wire [DATA_WIDTH-1:0] next_pc,
+output wire [DATA_WIDTH-1:0] rd_data,
+output wire [DATA_WIDTH-1:0] alu_result,
+output wire                  branch_taken,
+
+//----------------------------------------------------------
+// External Memory Interface
+//----------------------------------------------------------
+
+output wire [DATA_WIDTH-1:0] mem_address,
+output wire [DATA_WIDTH-1:0] mem_write_data,
+output wire                  mem_read,
+output wire                  mem_write,
+output wire [2:0]            mem_funct3,
+
+input wire  [DATA_WIDTH-1:0] mem_read_data
 );
 
     //==========================================================
@@ -255,50 +270,25 @@ module rv32i_datapath #(
 
     );
 
+    //----------------------------------------------------------
+// External Memory Interface
+//----------------------------------------------------------
 
-    //==========================================================
-    // 7. Data Memory
-    //
-    // Address:
-    //     ALU result
-    //
-    // Store data:
-    //     rs2_data
-    //
-    // funct3 is required by Data Memory to distinguish:
-    //
-    //     LB
-    //     LH
-    //     LW
-    //     LBU
-    //     LHU
-    //
-    // and:
-    //
-    //     SB
-    //     SH
-    //     SW
-    //==========================================================
+// ALU result is the effective address for load/store
+assign mem_address = alu_result;
 
-    data_memory #(
-        .DATA_WIDTH(DATA_WIDTH)
-    ) u_data_memory (
+// Store data comes from rs2
+assign mem_write_data = rs2_data;
 
-        .clk       (clk),
-        .rst       (rst),
+// Memory control signals come from the main control unit
+assign mem_read  = MemRead;
+assign mem_write = MemWrite;
 
-        .mem_read  (MemRead),
-        .mem_write (MemWrite),
+// funct3 determines byte/halfword/word operation
+assign mem_funct3 = instruction[14:12];
 
-        .funct3    (funct3),
 
-        .address   (alu_result),
 
-        .write_data(rs2_data),
-
-        .read_data (memory_data)
-
-    );
 
 
     //==========================================================
@@ -520,7 +510,7 @@ module rv32i_datapath #(
     ) u_write_back (
 
         .alu_result (alu_result),
-        .memory_data(memory_data),
+        .memory_data(mem_read_data),
         .pc_plus_4  (pc_plus_4),
 
         .wb_src     (wb_src),

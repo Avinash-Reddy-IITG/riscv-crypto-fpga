@@ -118,9 +118,7 @@ module rv32i_cpu_tb;
         begin
 
             actual =
-                dut.u_rv32i_datapath
-                   .u_data_memory
-                   .memory[address];
+                dut.u_data_memory.memory[address];
 
             tests = tests + 1;
 

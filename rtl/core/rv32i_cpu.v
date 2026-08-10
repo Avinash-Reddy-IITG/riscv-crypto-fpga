@@ -17,7 +17,10 @@
 //     - RV32I Datapath
 //
 //   The datapath contains the internal register, ALU,
-//   branch, memory, next-PC and write-back functionality.
+//   branch, next-PC and write-back functionality.
+//
+//   Data memory is connected externally through the
+//   datapath memory interface.
 //
 // Target FPGA : Xilinx Artix-7 (Basys-3)
 //==============================================================
@@ -79,13 +82,24 @@ module rv32i_cpu #(
     wire [3:0] alu_control;
 
     //----------------------------------------------------------
-    // Datapath Outputs
-    //----------------------------------------------------------
+// Datapath Outputs
+//----------------------------------------------------------
 
-    wire [DATA_WIDTH-1:0] rd_data;
-    wire [DATA_WIDTH-1:0] alu_result;
-    wire [DATA_WIDTH-1:0] memory_data;
-    wire                  branch_taken;
+wire [DATA_WIDTH-1:0] rd_data;
+wire [DATA_WIDTH-1:0] alu_result;
+wire                  branch_taken;
+
+    //----------------------------------------------------------
+// External Data Memory Interface
+//----------------------------------------------------------
+
+wire [DATA_WIDTH-1:0] mem_address;
+wire [DATA_WIDTH-1:0] mem_write_data;
+wire                  mem_read;
+wire                  mem_write;
+wire [2:0]            mem_funct3;
+
+wire [DATA_WIDTH-1:0] mem_read_data;
 
     //----------------------------------------------------------
     // Program Counter
@@ -168,12 +182,48 @@ module rv32i_cpu #(
 
         .alu_control (alu_control),
 
-        .next_pc     (pc_next),
-        .rd_data     (rd_data),
-        .alu_result  (alu_result),
-        .memory_data (memory_data),
-        .branch_taken(branch_taken)
+            .next_pc        (pc_next),
+    .rd_data        (rd_data),
+    .alu_result     (alu_result),
+    .branch_taken   (branch_taken),
+
+    .mem_address    (mem_address),
+    .mem_write_data (mem_write_data),
+    .mem_read       (mem_read),
+    .mem_write      (mem_write),
+    .mem_funct3     (mem_funct3),
+
+    .mem_read_data  (mem_read_data)
     );
+
+    //----------------------------------------------------------
+// Data Memory
+//
+// The Data Memory is now external to the datapath.
+//
+// The datapath generates the memory request while this
+// module performs the actual memory operation.
+//----------------------------------------------------------
+
+data_memory #(
+    .DATA_WIDTH(DATA_WIDTH)
+) u_data_memory (
+
+    .clk       (clk),
+    .rst       (rst),
+
+    .mem_read  (mem_read),
+    .mem_write (mem_write),
+
+    .funct3    (mem_funct3),
+
+    .address   (mem_address),
+
+    .write_data(mem_write_data),
+
+    .read_data (mem_read_data)
+
+);
 
 endmodule
 

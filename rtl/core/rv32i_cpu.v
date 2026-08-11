@@ -34,7 +34,10 @@ module rv32i_cpu #(
     //----------------------------------------------------------
 
     input wire clk,
-    input wire rst
+    input wire rst,
+
+    // Debug output
+    output wire [DATA_WIDTH-1:0] debug_pc
 );
 
     //----------------------------------------------------------
@@ -43,6 +46,12 @@ module rv32i_cpu #(
 
     wire [DATA_WIDTH-1:0] pc;
     wire [DATA_WIDTH-1:0] pc_next;
+
+    //----------------------------------------------------------
+// Debug Output
+//----------------------------------------------------------
+
+assign debug_pc = pc;
 
     //----------------------------------------------------------
     // Instruction Memory
